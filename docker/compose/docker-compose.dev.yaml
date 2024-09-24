@@ -7,9 +7,15 @@ services:
       context: ./docker/images/db
       dockerfile: Dockerfile
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres__dev_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_PASSWORD=${DB_PWD}
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
   api:
     container_name: arj-dev-api
     stdin_open: true
@@ -20,7 +26,11 @@ services:
     volumes:
       - ./src/api:/usr/src/app
     environment:
+      - PYTHON_ENV=${PYTHON_ENV}
       - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      db:
+        condition: service_healthy
     
 volumes:
-  postgres_data:
+  postgres__dev_data:
