@@ -1,0 +1,26 @@
+services:
+  db:
+    container_name: arj-dev-db
+    stdin_open: true
+    env_file: ./.env
+    build:
+      context: ./docker/images/db
+      dockerfile: Dockerfile
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=${DB_PWD}
+  api:
+    container_name: arj-dev-api
+    stdin_open: true
+    env_file: ./.env
+    build:
+      context: ./docker/images/python
+      dockerfile: Dockerfile
+    volumes:
+      - ./src/api:/usr/src/app
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    
+volumes:
+  postgres_data:

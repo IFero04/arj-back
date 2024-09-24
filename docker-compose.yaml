@@ -1,0 +1,7 @@
+services:
+  db:
+    build:
+      context: .
+  api:
+    build:
+      context: .
