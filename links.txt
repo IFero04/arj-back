@@ -1,0 +1,8 @@
+## OAuth2 ##
+https://levelup.gitconnected.com/structuring-fastapi-project-using-3-tier-design-pattern-4d2e88a55757
+https://github.com/viktorsapozhok/fastapi-services-oauth2/blob/master/app/routers/auth.py
+https://github.com/faif/python-patterns/blob/master/patterns/structural/3-tier.py
+
+## Google Auth ##
+https://medium.com/@vivekpemawat/enabling-googleauth-for-fast-api-1c39415075ea
+https://www.youtube.com/watch?v=EIZTy4XyXjU
