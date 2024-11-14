@@ -1,15 +1,19 @@
 services:
   db:
     container_name: arj-dev-db
+    restart: on-failure
     stdin_open: true
-    env_file: ./.env
+    env_file: .env
     build:
       context: ./docker/images/db
       dockerfile: Dockerfile
     volumes:
-      - postgres__dev_data:/var/lib/postgresql/data/
+      - postgres_dev_data:/var/lib/postgresql/data/
     environment:
+      - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PWD}
+    ports:
+      - ${DB_PORT}
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 10s
@@ -18,19 +22,18 @@ services:
       start_period: 5s
   api:
     container_name: arj-dev-api
+    restart: on-failure
     stdin_open: true
-    env_file: ./.env
+    env_file: .env
     build:
       context: ./docker/images/python
       dockerfile: Dockerfile
     volumes:
-      - ./src/api:/usr/src/app
-    environment:
-      - PYTHON_ENV=${PYTHON_ENV}
-      - DATABASE_URL=${DATABASE_URL}
+      - ./src/app:/usr/src/app
+    ports:
+      - "$API_PORT_EXTERNAL:$API_PORT_INTERNAL"
     depends_on:
       db:
         condition: service_healthy
-    
 volumes:
-  postgres__dev_data:
+  postgres_dev_data:

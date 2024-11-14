@@ -1,8 +1,16 @@
-CREATE DATABASE arj;
-\c arj;
+CREATE SCHEMA IF NOT EXISTS myapi;
 
--- Create user for the API with password from environment variable
-CREATE USER api WITH PASSWORD 'api';
+CREATE TABLE IF NOT EXISTS myapi.movies (
+    movie_id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    released INTEGER NOT NULL,
+    rating NUMERIC(2, 1) NOT NULL
+);
 
--- Create necessary extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE TABLE IF NOT EXISTS myapi.users (
+    user_id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    hashed_password TEXT NOT NULL,
+    UNIQUE(email)
+);

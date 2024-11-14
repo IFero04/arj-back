@@ -1,31 +1,44 @@
-import psycopg2
-import os
-from urllib.parse import urlparse
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import OAuth2AuthorizationCodeBearer
 
-# Fetch the DATABASE_URL from environment variables
-DATABASE_URL = os.getenv("DATABASE_URL")
+from jwt import PyJWKClient
+import jwt
+from typing import Annotated
 
-def connect_to_db():
+app = FastAPI()
+
+oauth_2_scheme = OAuth2AuthorizationCodeBearer(
+    tokenUrl="http://path/to/realm/protocol/openid-connect/token",
+    authorizationUrl="http://path/to/realm/protocol/openid-connect/auth",
+    refreshUrl="http://path/to/realm/protocol/openid-connect/token",
+)
+
+async def valid_access_token(
+    access_token: Annotated[str, Depends(oauth_2_scheme)]
+):
+    url = "http://path/to/realm/protocol/openid-connect/certs"
+    optional_custom_headers = {"User-agent": "custom-user-agent"}
+    jwks_client = PyJWKClient(url, headers=optional_custom_headers)
+
     try:
-        # Parse the URL to ensure correctness
-        result = urlparse(DATABASE_URL)
-        if not all([result.scheme, result.hostname, result.path, result.username, result.password]):
-            raise ValueError("Invalid DATABASE_URL format")
+        signing_key = jwks_client.get_signing_key_from_jwt(access_token)
+        data = jwt.decode(
+            access_token,
+            signing_key.key,
+            algorithms=["RS256"],
+            audience="api",
+            options={"verify_exp": True},
+        )
+        return data
+    except jwt.exceptions.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Not authenticated")
 
-        # Connect to PostgreSQL using the database URL
-        connection = psycopg2.connect(DATABASE_URL)
-        cursor = connection.cursor()
 
-        # Execute a simple query to verify the connection
-        cursor.execute("SELECT version();")
-        db_version = cursor.fetchone()
-        print(f"Connected to PostgreSQL database. Version: {db_version[0]}")
+@app.get("/public")
+def get_public():
+    return {"message": "Ce endpoint est public"}
 
-        cursor.close()
-        connection.close()
 
-    except Exception as error:
-        print(f"Error connecting to the database: {error}")
-
-if __name__ == "__main__":
-    connect_to_db()
+@app.get("/private", dependencies=[Depends(valid_access_token)])
+def get_private():
+    return {"message": "Ce endpoint est privé"}

@@ -1,0 +1,25 @@
+from enum import Enum
+from typing import (
+    Final,
+    List,
+)
+
+
+# Open API parameters
+OPEN_API_TITLE: Final = "ARJ API Hub"
+OPEN_API_DESCRIPTION: Final = "API"
+
+# Authentication service constants
+AUTH_TAGS: Final[List[str | Enum] | None] = ["Authentication"]
+AUTH_URL: Final = "token"
+
+TOKEN_TYPE: Final = "bearer"
+TOKEN_EXPIRE_MINUTES: Final = 60
+
+# Algorithm used to sign the JWT tokens
+TOKEN_ALGORITHM: Final = "HS256"
+
+# Movies service constants
+MOVIES_TAGS: Final[List[str | Enum] | None] = ["Movies"]
+MOVIES_URL: Final = "movies"
+MOVIES_URL_NEW: Final = "new"
